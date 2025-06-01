@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cio</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #33ff33;
+      font-family: monospace;
+      padding: 20px;
+    }
+
+    .terminal {
+      background: #000;
+      border: 2px solid #33ff33;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 900px;
+      margin: 50px auto;
+      box-shadow: 0 0 20px #33ff33;
+      font-size: 16px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1em;
+      background-color: #33ff33;
+      animation: blink 1s steps(1) infinite;
+      vertical-align: bottom;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="terminal" id="terminal">
+    <div id="output"></div><span class="cursor"></span>
+  </div>
+
+  <script>
+    const message = `┌──(root@cio)-[~/bildiri]
+└─# Merhaba. 
+
+Küçük yaşlardan beri hiç kolay bir hayatım olmadı...
+
+Çocukken çocuk gibi yaşayamadım.
+Çevremde insanlar vardı ama gerçek anlamda yanımda kimse yoktu.
+Hep güçlü olmam gerekti, hep susmam, sabretmem, unutmam beklendi.
+
+Ben hiçbir zaman sadece "bir çocuk" olmadım...
+Zihnim erken yaşta yoruldu, kalbim çok şeyi sessizce taşıdı.
+
+Gerçek dostluklar neredeyse hiç olmadı.
+Güvendiğim birkaç kişi dışında kimsem olmadı.
+
+Ve bugün artık, buradan sessizce çekiliyorum.
+
+Kimseye sitem etmiyorum, kimseye kırgın da değilim.
+
+Ama içimde tarifsiz bir yalnızlık var artık, kendimi iyi hissetmiyorum.
+Bir süreliğine değil, sonsuza kadar uzaklaşmak istiyorum.
+
+Hayatımda bazı şeyler yolunda gitmiyor.
+Ve onlarla baş başa kalmam gerek.
+
+Bu site... Burası... Buradaki insanlar... burası artık bana ait değil.
+Birçok şey anlamını yitirdi.
+
+Bu, benim son notum.
+
+Cio’nun son sözleridir:
+
+Eğer bu satırları bir gün biri okursa şunu bilsin:
+Sevdiklerimi hep sevdim.
+Ama kendimi sevecek gücü hiç bulamadım.
+
+Hoşça kalın...
+Sağlıcakla kalın...
+
+Ben artık yokum.
+
+┌──(root@cio)-[~/son]
+└─#`;
+
+    const output = document.getElementById('output');
+    let index = 0;
+
+    function typeNextChar() {
+      if (index < message.length) {
+        const char = message[index];
+        if (char === '\n') {
+          output.insertAdjacentHTML('beforeend', '<br>');
+        } else {
+          output.insertAdjacentHTML('beforeend', char);
+        }
+        index++;
+        setTimeout(typeNextChar, 35); // Hız ayarı burada (ms)
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      typeNextChar();
+    });
+  </script>
+
+</body>
+</html>
