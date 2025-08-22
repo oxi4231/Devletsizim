@@ -19,7 +19,7 @@
       border-radius: 8px;
       padding: 20px;
       max-width: 900px;
-      margin: 50px auto;
+      margin: 100px auto 50px auto; /* Üstte player için boşluk */
       box-shadow: 0 0 20px #33ff33;
       font-size: 16px;
       line-height: 1.5;
@@ -39,17 +39,61 @@
     @keyframes blink {
       50% { opacity: 0; }
     }
+
+    /* Müzik player stili */
+    .music-player {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      border: 2px solid #33ff33;
+      border-radius: 8px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 15px #33ff33;
+      z-index: 1000;
+    }
+
+    .music-player button {
+      background: #000;
+      border: 1px solid #33ff33;
+      color: #33ff33;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .music-player button:hover {
+      background: #33ff33;
+      color: #000;
+    }
   </style>
 </head>
 <body>
-<audio id="bg-music" autoplay loop>
-  <source src="sunny-day-7947.mp3" type="audio/mpeg">
-</audio>
+
+  <!-- Müzik player -->
+  <div class="music-player">
+    <button id="playPause">▶️ Play</button>
+    <span id="trackName">sunny-day-7947.mp3</span>
+  </div>
+
+  <audio id="bg-music" loop>
+    <source src="sunny-day-7947.mp3" type="audio/mpeg">
+    Tarayıcınız audio etiketini desteklemiyor.
+  </audio>
+
+  <!-- Terminal -->
   <div class="terminal" id="terminal">
     <div id="output"></div><span class="cursor"></span>
   </div>
 
   <script>
+    // Terminal yazma efekti
     const message = `┌──(root@cio)-[~/bildiri]
 └─# Merhaba Arkadaşlar.
 
@@ -84,12 +128,35 @@ Herkese iyi dileklerimle.
           output.insertAdjacentHTML('beforeend', char);
         }
         index++;
-        setTimeout(typeNextChar, 35); // Hız ayarı burada (ms)
+        setTimeout(typeNextChar, 35);
       }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       typeNextChar();
+    });
+
+    // Müzik player JS
+    const bgMusic = document.getElementById('bg-music');
+    const playPauseBtn = document.getElementById('playPause');
+
+    playPauseBtn.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.play();
+        playPauseBtn.textContent = '⏸️ Pause';
+      } else {
+        bgMusic.pause();
+        playPauseBtn.textContent = '▶️ Play';
+      }
+    });
+
+    // Sayfa yüklendiğinde otomatik çalmayı dene (tarayıcı izin verirse)
+    window.addEventListener('load', () => {
+      bgMusic.play().then(() => {
+        playPauseBtn.textContent = '⏸️ Pause';
+      }).catch(() => {
+        playPauseBtn.textContent = '▶️ Play';
+      });
     });
   </script>
 
