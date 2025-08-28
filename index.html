@@ -1,164 +1,333 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>cio</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>cio - neon skull</title>
   <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: #33ff33;
-      font-family: monospace;
-      padding: 20px;
+    :root{
+      --bg:#000;
+      --neon:#33ff33;
+      --neon-dim:rgba(51,255,51,0.18);
+      --glass:rgba(0,0,0,0.45);
+      --mono: 'Courier New', Courier, monospace;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; padding:20px; background:var(--bg); color:var(--neon); font-family:var(--mono);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    .terminal {
-      background: #000;
-      border: 2px solid #33ff33;
-      border-radius: 8px;
-      padding: 20px;
-      max-width: 900px;
-      margin: 100px auto 50px auto; /* Üstte player için boşluk */
-      box-shadow: 0 0 20px #33ff33;
-      font-size: 16px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
+    /* Music player preserved on top */
+    .music-player{
+      position:fixed; top:10px; left:50%; transform:translateX(-50%);
+      background:transparent; border:2px solid var(--neon); border-radius:8px; padding:8px 14px;
+      display:flex; align-items:center; gap:12px; z-index:1200; box-shadow:0 0 18px var(--neon-dim);
+    }
+    .music-player button{background:transparent;border:1px solid var(--neon);color:var(--neon);padding:6px 10px;border-radius:6px;cursor:pointer;font-family:var(--mono)}
+    .music-player button:hover{background:var(--neon);color:#000}
+
+    /* Wrapper similar to terminal look */
+    .frame{
+      max-width:1000px;margin:90px auto 40px; padding:28px; border-radius:10px; border:2px solid var(--neon);
+      box-shadow:0 0 30px var(--neon-dim); background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3));
+      position:relative; overflow:hidden;
     }
 
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      height: 1em;
-      background-color: #33ff33;
-      animation: blink 1s steps(1) infinite;
-      vertical-align: bottom;
+    .canvas-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:12px}
+    canvas{display:block; width:100%; max-width:780px; height:480px; background:transparent}
+
+    /* DEVLETSİZİM text */
+    .tagline{
+      font-size:36px; letter-spacing:6px; color:var(--neon); text-align:center; font-weight:700;
+      text-shadow:0 0 24px rgba(51,255,51,0.25), 0 0 6px rgba(0,0,0,0.6);
+      font-family:var(--mono); user-select:none; margin-top:6px;
     }
 
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
+    /* small helper controls */
+    .controls{position:absolute; right:14px; bottom:14px; display:flex; gap:8px; z-index:1100}
+    .controls button{background:transparent;border:1px solid var(--neon);color:var(--neon);padding:6px 8px;border-radius:6px;cursor:pointer}
 
-    /* Müzik player stili */
-    .music-player {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      border: 2px solid #33ff33;
-      border-radius: 8px;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 0 15px #33ff33;
-      z-index: 1000;
-    }
+    /* footer terminal prompt effect */
+    .prompt{font-size:13px; opacity:0.7; margin-top:8px}
 
-    .music-player button {
-      background: #000;
-      border: 1px solid #33ff33;
-      color: #33ff33;
-      padding: 5px 10px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 14px;
-    }
-
-    .music-player button:hover {
-      background: #33ff33;
-      color: #000;
+    @media (max-width:640px){
+      .tagline{font-size:24px}
+      canvas{height:360px}
     }
   </style>
 </head>
 <body>
-
-  <!-- Müzik player -->
-  <div class="music-player">
-    <button id="playPause">▶️ Play</button>
-    <span id="trackName">just chill bros.mp3</span>
+  <div class="frame">
+<div class="canvas-wrap">
+  <canvas id="skullCanvas" width="780" height="480" aria-label="Neon skull animation"></canvas>
+  <div class="tagline" id="tagline">DEVLETSİZİM</div>
+  <div class="tagline" style="font-size:22px;opacity:0.8;letter-spacing:3px;">
+    geri dönüyorum orospu çocukları
+  </div>
+  <br><br>
+</div>
   </div>
 
-  <audio id="bg-music" loop>
-    <source src="sunny-day-7947.mp3" type="audio/mpeg">
-    Tarayıcınız audio etiketini desteklemiyor.
-  </audio>
-
-  <!-- Terminal -->
-  <div class="terminal" id="terminal">
-    <div id="output"></div><span class="cursor"></span>
-  </div>
 
   <script>
-    // Terminal yazma efekti
-    const message = `┌──(root@cio)-[~/bildiri]
-└─# Merhaba Arkadaşlar.
+    /* Advanced neon skull using canvas: features
+       - Procedural skull drawing (head, sockets, nose, teeth, jaw)
+       - Glowing eyes that follow mouse / touch
+       - Breathing pulse animation
+       - Particle smoke and sparks
+       - Interactivity: toggle systems on/off, click to shatter effect
+    */
 
-Öncelikle bu ne twit de atabilirdin diyeceksiniz ama benim tarzım bu 😜. Üstteki play tuşuna basarak şarkı eşliğinde okuyun tavsiyemdir ben öyle beğendim umarım beğenirsin 💔...
+    const canvas = document.getElementById('skullCanvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width, H = canvas.height;
 
-Uzun süredir düşündüğüm bir kararı artık uygulama zamanı geldi. Twitter’dan ayrılmaya karar verdim.
+    // Hi-DPI support
+    function resizeCanvas(){
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      W = Math.max(300, Math.floor(rect.width));
+      H = Math.max(200, Math.floor(rect.height));
+      canvas.width = Math.floor(W * ratio);
+      canvas.height = Math.floor(H * ratio);
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(ratio,0,0,ratio,0,0);
+    }
 
-Bunun birkaç nedeni var. Öncelikle, burası benim hayatımdan çok fazla zaman çalmaya başladı. Günlerim, saatlerim, dakikalarım burada kayboluyor. Oysa ben artık hayatımda gerçekten değer verdiğim şeylere; sevdiklerime, işime, kendi gelişimime ve huzuruma odaklanmak istiyorum. Burada sürekli bir kaos, bitmeyen tartışmalar, anlamsız polemikler ve kirli bir enerji var. Ne kadar uzak durmaya çalışsam da, farkında olmadan içine çekildiğimi hissediyorum.
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-Bir diğer mesele de şu: Buradaki insanların büyük bir kısmı, kendi dar bakış açılarıyla, hoşgörüsüzlükleriyle, gereksiz kavgalarıyla insanı tüketiyor. Aptallık, cehalet ve seviyesizlik o kadar sıradanlaşmış ki, artık buradan aldığım hiçbir şey bana iyi gelmiyor. Aksine, huzurumu bozuyor, sinirlerimi yıpratıyor ve beni kendimden uzaklaştırıyor.
+    // State
+    let t = 0;
+    let mouse = {x: W/2, y: H/2, down:false};
+    let particles = [];
+    let settings = {particles:true, pulse:true, eyeFollow:true};
 
-Ben hayatımı sosyal medya bataklığında sürüklenerek geçirmek istemiyorum. Her gün yeni bir saçmalığın içinde kaybolmak yerine, kendi hayatımda gerçek ve değerli şeylere yoğunlaşmak istiyorum.
+    // Utilities
+    function rand(a,b){return a + Math.random()*(b-a)}
+    function lerp(a,b,u){return a + (b-a)*u}
+    function dist(x1,y1,x2,y2){return Math.hypot(x2-x1,y2-y1)}
 
-Twitter bana bazı güzel anılar, dostluklar ve bakış açıları kattı, bunun için minnettarım. Ama artık bu defteri kapatma vakti geldi. Bundan sonrası için, daha sakin, daha huzurlu, daha üretken ve gerçek bir hayat kurmaya odaklanacağım.
-
-Son olarak; Amedspor time’a teşekkürlerimi iletmek istiyorum. Sizlerin yeri bende ayrı. Twitter’ı ve sizleri “ghost mode”da, sessizce takip etmeye devam edeceğim.
-
-Herkese iyi dileklerimle.
-
-┌──(root@cio)-[~/son]
-└─#`;
-
-    const output = document.getElementById('output');
-    let index = 0;
-
-    function typeNextChar() {
-      if (index < message.length) {
-        const char = message[index];
-        if (char === '\n') {
-          output.insertAdjacentHTML('beforeend', '<br>');
+    // Particle system (smoke + sparks)
+    class Particle{
+      constructor(x,y,opts={}){
+        this.x = x; this.y = y;
+        this.vx = rand(-0.3,0.3); this.vy = rand(-0.6,-1.5);
+        this.size = rand(6,18); this.life = rand(1.2,3.5); this.age=0;
+        this.kind = opts.kind || 'smoke';
+        this.h = rand(90,140); // hue-ish for neon green
+      }
+      update(dt){ this.age += dt; this.x += this.vx*dt*60; this.y += this.vy*dt*60; this.vx *= 0.995; }
+      draw(ctx){
+        const p = this.age/this.life; if(p>1) return;
+        if(this.kind==='smoke'){
+          ctx.save();
+          ctx.globalAlpha = (1-p)*0.32;
+          const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size*(1+p*2));
+          g.addColorStop(0,'rgba(51,255,51,0.25)');
+          g.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(this.x,this.y,this.size*(1+p*2),0,Math.PI*2); ctx.fill();
+          ctx.restore();
         } else {
-          output.insertAdjacentHTML('beforeend', char);
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = (1-p);
+          ctx.fillStyle = `rgba(51,255,51,${0.8*(1-p)})`;
+          ctx.beginPath(); ctx.arc(this.x,this.y,this.size*(1-p),0,Math.PI*2); ctx.fill();
+          ctx.restore();
         }
-        index++;
-        setTimeout(typeNextChar, 35);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      typeNextChar();
+    function spawnSmoke(x,y,amt=3){ for(let i=0;i<amt;i++) particles.push(new Particle(x+rand(-12,12), y+rand(-6,6), {kind:'smoke'})); }
+    function spawnSparks(x,y,amt=6){ for(let i=0;i<amt;i++){ const p=new Particle(x,y,{kind:'spark'}); p.vx=rand(-2,2); p.vy=rand(-3, -0.6); p.size=rand(2,6); p.life=rand(0.6,1.2); particles.push(p);} }
+
+    // Skull drawing parameters relative to canvas size
+    function skullParams(){
+      const cx = W/2, cy = H*0.45;
+      const scale = Math.min(W, H)/420; // base
+      return {cx,cy,scale};
+    }
+
+    // Draw a soft neon stroke for a path: we approximate by stroking multiple times with varying alpha
+    function neonStrokePath(pathFunc, glow=20, color='rgba(51,255,51,0.9)'){
+      ctx.save(); ctx.lineJoin='round'; ctx.lineCap='round';
+      for(let i=glow;i>0;i-=3){ ctx.strokeStyle = `rgba(51,255,51,${0.02})`; ctx.lineWidth = i; pathFunc(); ctx.stroke(); }
+      ctx.strokeStyle = color; ctx.lineWidth = 2; pathFunc(); ctx.stroke(); ctx.restore();
+    }
+
+    // Procedural skull
+    function drawSkull(cx,cy,scale, eyes){
+      ctx.save(); ctx.translate(cx,cy);
+      // breathing scale effect
+      const b = settings.pulse ? 1 + Math.sin(t*2.2)*0.02 : 1;
+      ctx.scale(b*scale, b*scale);
+
+      // Head outline
+      neonStrokePath(()=>{
+        ctx.beginPath(); ctx.moveTo(-70, -80);
+        ctx.bezierCurveTo(-120,-80,-130,-10,-110,30);
+        ctx.bezierCurveTo(-90,80,-40,110,0,120);
+        ctx.bezierCurveTo(40,110,90,80,110,30);
+        ctx.bezierCurveTo(130,-10,120,-80,70,-80);
+      }, 26);
+
+      // Hollow sockets
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      // left socket
+      const lx = -38, ly = -10; const le = 28;
+      const rx = 38, ry=-10, re=28;
+      const eyeGlow = 1.0;
+      // Draw socket shadow
+      ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.beginPath(); ctx.ellipse(lx,ly,le,le*1.2,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(rx,ry,re,re*1.2,0,0,Math.PI*2); ctx.fill();
+      // Eye core (glow)
+      ctx.beginPath(); ctx.ellipse(lx + eyes.lx*6, ly + eyes.ly*6, 10+Math.abs(Math.sin(t*6))*6, 10+Math.abs(Math.sin(t*6))*6,0,0,Math.PI*2);
+      const g1 = ctx.createRadialGradient(lx,ly,2, lx,ly,60);
+      g1.addColorStop(0,'rgba(180,255,180,1)'); g1.addColorStop(0.2,'rgba(120,255,120,0.9)'); g1.addColorStop(0.6,'rgba(51,255,51,0.25)'); g1.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g1; ctx.fill();
+
+      ctx.beginPath(); ctx.ellipse(rx + eyes.rx*6, ry + eyes.ry*6, 10+Math.abs(Math.cos(t*6))*6, 10+Math.abs(Math.cos(t*6))*6,0,0,Math.PI*2);
+      const g2 = ctx.createRadialGradient(rx,ry,2, rx,ry,60);
+      g2.addColorStop(0,'rgba(180,255,180,1)'); g2.addColorStop(0.2,'rgba(120,255,120,0.9)'); g2.addColorStop(0.6,'rgba(51,255,51,0.25)'); g2.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g2; ctx.fill();
+      ctx.restore();
+
+      // Nose cavity
+      neonStrokePath(()=>{
+        ctx.beginPath(); ctx.moveTo(-8,10); ctx.lineTo(0,32); ctx.lineTo(8,10);
+      }, 18);
+
+      // Teeth row (upper)
+      neonStrokePath(()=>{
+        ctx.beginPath();
+        for(let i= -44;i<=44;i+=12){ ctx.rect(i,58,8,14); }
+      }, 10);
+
+      // Jaw (animated)
+      const jawOffset = settings.pulse ? Math.sin(t*2)*6 : 0;
+      neonStrokePath(()=>{
+        ctx.beginPath(); ctx.moveTo(-82,100);
+        ctx.quadraticCurveTo(-40,120+jawOffset,0,128+jawOffset*0.7);
+        ctx.quadraticCurveTo(40,120+jawOffset,82,100);
+      }, 16);
+
+      // Decorative circuits / cracks
+      neonStrokePath(()=>{
+        ctx.beginPath(); ctx.moveTo(-20,-60); ctx.lineTo(-40,-40); ctx.lineTo(-60,-42);
+      }, 10);
+
+      // subtle inner shimmer
+      ctx.restore();
+    }
+
+    // Eye tracking calculation: returns normalized offsets -1..1
+    function computeEyeTargets(){
+      const p = skullParams();
+      const cx = p.cx, cy = p.cy - p.scale*20;
+      const leftEye = {x: cx - p.scale*38, y: cy - p.scale*10};
+      const rightEye = {x: cx + p.scale*38, y: cy - p.scale*10};
+      const maxMove = 10;
+      const lx = Math.max(-1, Math.min(1, (mouse.x - leftEye.x)/maxMove));
+      const ly = Math.max(-1, Math.min(1, (mouse.y - leftEye.y)/maxMove));
+      const rx = Math.max(-1, Math.min(1, (mouse.x - rightEye.x)/maxMove));
+      const ry = Math.max(-1, Math.min(1, (mouse.y - rightEye.y)/maxMove));
+      return {lx,ly,rx,ry};
+    }
+
+    // Main loop
+    let last = performance.now();
+    function loop(now){
+      const dt = Math.min(0.05, (now-last)/1000);
+      last = now; t += dt;
+
+      // clear
+      ctx.clearRect(0,0,W,H);
+
+      // ambient vignette
+      ctx.save();
+      const grad = ctx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0,'rgba(0,0,0,0)'); grad.addColorStop(1,'rgba(0,0,0,0.35)');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+      ctx.restore();
+
+      // spawn gentle smoke at mouth area occasionally
+      if(settings.particles && Math.random()<0.12) spawnSmoke(W/2, H*0.62, 1);
+
+      // update & draw particles
+      for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.update(dt); if(p.age>p.life) particles.splice(i,1); }
+      for(const p of particles) p.draw(ctx);
+
+      // skull draw
+      const psk = skullParams();
+      const eyes = settings.eyeFollow ? computeEyeTargets() : {lx:0,ly:0,rx:0,ry:0};
+      drawSkull(psk.cx, psk.cy, psk.scale*1.1, eyes);
+
+      // electric sparks around sockets
+      if(settings.particles){
+        ctx.save(); ctx.globalCompositeOperation='lighter';
+        for(let i=0;i<6;i++){
+          const ang = Math.sin(t*3 + i) ;
+          const x = psk.cx + Math.cos(ang+i)* (psk.scale*40) + rand(-6,6);
+          const y = psk.cy + Math.sin(ang*1.3 + i)*10 + rand(-6,6);
+          ctx.beginPath(); ctx.arc(x,y,1.5+Math.random()*2,0,Math.PI*2); ctx.fillStyle = 'rgba(180,255,180,0.9)'; ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // subtle scanline overlay to feel 'terminal'
+      ctx.save(); ctx.globalAlpha = 0.03; ctx.fillStyle = 'rgba(51,255,51,0.06)';
+      for(let y=0;y<H;y+=3){ ctx.fillRect(0,y,W,1); }
+      ctx.restore();
+
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+
+    // Interaction: mouse/touch
+    canvas.addEventListener('mousemove', (e)=>{
+      const r = canvas.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+    });
+    canvas.addEventListener('mouseleave', ()=>{ mouse.x=W/2; mouse.y=H/2 });
+
+    canvas.addEventListener('click', (e)=>{
+      const r = canvas.getBoundingClientRect(); const x = e.clientX - r.left; const y = e.clientY - r.top;
+      if(settings.particles){ spawnSparks(x,y,14); }
+      // click to shatter: quick burst
+      for(let i=0;i<14;i++) particles.push(new Particle(x+rand(-20,20), y+rand(-20,20), {kind:'spark'}));
     });
 
-    // Müzik player JS
+    // Controls
+    document.getElementById('toggleParticles').addEventListener('click', (e)=>{
+      settings.particles = !settings.particles; e.target.textContent = `Particles: ${settings.particles? 'ON':'OFF'}`;
+    });
+    document.getElementById('togglePulse').addEventListener('click', (e)=>{ settings.pulse=!settings.pulse; e.target.textContent=`Pulse: ${settings.pulse? 'ON':'OFF'}` });
+    document.getElementById('toggleEyes').addEventListener('click', (e)=>{ settings.eyeFollow=!settings.eyeFollow; e.target.textContent=`Eyes: ${settings.eyeFollow? 'FOLLOW':'FIXED'}` });
+
+    // Soft periodic smoke generator near mouth
+    setInterval(()=>{ if(settings.particles) spawnSmoke(W/2, H*0.62, Math.floor(rand(1,3))); }, 900);
+
+    // Music player logic (kept simple)
     const bgMusic = document.getElementById('bg-music');
     const playPauseBtn = document.getElementById('playPause');
-
-    playPauseBtn.addEventListener('click', () => {
-      if (bgMusic.paused) {
-        bgMusic.play();
-        playPauseBtn.textContent = '⏸️ Pause';
-      } else {
-        bgMusic.pause();
-        playPauseBtn.textContent = '▶️ Play';
-      }
+    playPauseBtn.addEventListener('click', ()=>{
+      if(bgMusic.paused){ bgMusic.play(); playPauseBtn.textContent='⏸️ Pause'; } else { bgMusic.pause(); playPauseBtn.textContent='▶️ Play'; }
     });
+    window.addEventListener('load', ()=>{ bgMusic.play().then(()=>{ playPauseBtn.textContent='⏸️ Pause'; }).catch(()=>{ playPauseBtn.textContent='▶️ Play'; }); });
 
-    // Sayfa yüklendiğinde otomatik çalmayı dene (tarayıcı izin verirse)
-    window.addEventListener('load', () => {
-      bgMusic.play().then(() => {
-        playPauseBtn.textContent = '⏸️ Pause';
-      }).catch(() => {
-        playPauseBtn.textContent = '▶️ Play';
-      });
-    });
+    // touch support
+    window.addEventListener('touchmove', (ev)=>{
+      const t0 = ev.touches[0]; const r = canvas.getBoundingClientRect(); mouse.x = t0.clientX - r.left; mouse.y = t0.clientY - r.top;
+    }, {passive:true});
+
+    // small accessibility: allow keyboard to pulse spark on space
+    window.addEventListener('keydown',(e)=>{ if(e.code==='Space'){ spawnSparks(W/2, H/2, 20); } });
+
   </script>
-
 </body>
 </html>
