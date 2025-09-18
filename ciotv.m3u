@@ -1,0 +1,10 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1" group-title="Spor", Bein Sports 1
+http://185.53.90.98:8080/murat501/3735re/35650
+
+#EXTINF:-1 tvg-id="bein2" tvg-name="Bein Sports 2" group-title="Spor", Bein Sports 2
+http://185.53.90.98:8080/murat501/3735re/195811
+
+#EXTINF:-1 tvg-id="bein3" tvg-name="Bein Sports 3" group-title="Spor", Bein Sports 3
+http://185.53.90.98:8080/murat501/3735re/195812
+
