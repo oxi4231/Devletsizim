@@ -1,18 +1,20 @@
 #EXTM3U
-#EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1" group-title="Spor", Bein Sports 1
+#PLAYLIST:CioTV
+
+#EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1" group-title="Spor", Bein Sports 1 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/126272
 
-#EXTINF:-1 tvg-id="bein2" tvg-name="Bein Sports 2" group-title="Spor", Bein Sports 2
+#EXTINF:-1 tvg-id="bein2" tvg-name="Bein Sports 2" group-title="Spor", Bein Sports 2 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/195811
 
-#EXTINF:-1 tvg-id="bein3" tvg-name="Bein Sports 3" group-title="Spor", Bein Sports 3
+#EXTINF:-1 tvg-id="bein3" tvg-name="Bein Sports 3" group-title="Spor", Bein Sports 3 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/195812
 
-#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 1" group-title="Spor", Tabii 1
+#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 1" group-title="Spor", Tabii 1 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/454312
 
-#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 2" group-title="Spor", Tabii 2
+#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 2" group-title="Spor", Tabii 2 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/454316
 
-#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 3" group-title="Spor", Tabii 3
+#EXTINF:-1 tvg-id="bein3" tvg-name="Tabii 3" group-title="Spor", Tabii 3 // CioTV //
 http://185.53.90.98:8080/murat501/3735re/454318
