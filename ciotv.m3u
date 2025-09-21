@@ -23,7 +23,7 @@ http://185.53.90.98:8080/rd3378/rd.378/454316
 http://185.53.90.98:8080/rd3378/rd.378/454318
 
 #EXTINF:-1 tvg-id="trtspor" tvg-name="TRT Spor" group-title="Spor", TRT Spor // CioTV //
-https://tv-trtspor1.medya.trt.com.tr/master.m3u8
+http://185.53.90.98:8080/rd3378/rd.378/6109
 
 #EXTINF:-1 tvg-id="ssport" tvg-name="S Sport 1" group-title="Spor", S Sport 1 // CioTV //
 http://185.53.90.98:8080/rd3378/rd.378/6106
