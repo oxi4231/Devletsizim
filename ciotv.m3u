@@ -1,9 +1,6 @@
 #EXTM3U
 #PLAYLIST:CioTV
 
-#EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1 (720p)" group-title="Spor", Bein Sports 1 (720p) // CioTV //
-http://185.53.90.98:8080/rd3378/rd.378/351541
-
 #EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1 (1080p)" group-title="Spor", Bein Sports 1 (1080p) // CioTV //
 http://185.53.90.98:8080/rd3378/rd.378/456568
 
@@ -31,3 +28,4 @@ http://185.53.90.98:8080/rd3378/rd.378/6109
 #EXTINF:-1 tvg-id="ssport" tvg-name="S Sport 1" group-title="Spor", S Sport 1 // CioTV //
 http://185.53.90.98:8080/rd3378/rd.378/6106
 
+#PLAYLIST:CioTV - Deneme
