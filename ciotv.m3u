@@ -7,6 +7,9 @@ http://185.53.90.98:8080/rd3378/rd.378/351541
 #EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1 (1080p)" group-title="Spor", Bein Sports 1 (1080p) // CioTV //
 http://185.53.90.98:8080/rd3378/rd.378/456568
 
+#EXTINF:-1 tvg-id="bein1" tvg-name="Bein Sports 1 (4K UHD)" group-title="Spor", Bein Sports 1
+http://185.53.90.98:8080/rd3378/rd.378/35650
+
 #EXTINF:-1 tvg-id="bein2" tvg-name="Bein Sports 2" group-title="Spor", Bein Sports 2 // CioTV //
 http://185.53.90.98:8080/rd3378/rd.378/195811
 
