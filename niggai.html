@@ -13,20 +13,21 @@
             font-family: 'Inter', sans-serif;
             /* Dinamik arka plan gradyanı */
             background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
+        }
+
+        /* --- YENİ: Mobil cihazlarda tam ekran hissi için --- */
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Sayfanın kendisinin scroll olmasını engelle */
         }
 
         #chat-window {
-            height: 70vh;
+            height: 100%; /* Artık flex-grow yerine tam yüksekliği kullanacak */
             overflow-y: auto;
             scroll-behavior: smooth;
         }
         
-        /* Mesaj balonu stilleri */
+        /* Mesaj balonu stilleri (Orijinal hali korundu) */
         .user-message {
             background-color: #22c55e; /* Canlı Yeşil */
             color: #1f2937;
@@ -40,8 +41,18 @@
             border-radius: 18px 18px 18px 3px;
             max-width: 85%;
         }
+
+        /* --- YENİ: Mesajların ekrana yumuşak bir animasyonla gelmesi için --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-container {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
         
-        /* Scrollbar'ı gizle (isteğe bağlı) */
+        /* Scrollbar'ı gizle (Orijinal hali korundu) */
         #chat-window::-webkit-scrollbar {
             display: none;
         }
@@ -53,34 +64,40 @@
 </head>
 <body class="antialiased">
 
-    <div id="app" class="w-full max-w-lg lg:max-w-xl bg-gray-800 shadow-2xl rounded-xl flex flex-col h-[90vh] overflow-hidden">
+    <div id="app" class="w-full max-w-2xl mx-auto bg-gray-800/90 backdrop-blur-sm shadow-2xl rounded-2xl flex flex-col h-full sm:h-[95vh] my-0 sm:my-4 overflow-hidden">
         
-        <header class="p-4 bg-gray-700 text-white flex items-center justify-between shadow-md">
+        <header class="p-4 bg-gray-900/50 border-b border-white/10 text-white flex items-center justify-between shadow-md flex-shrink-0">
             <div class="flex items-center">
                 <span class="mr-3 p-2 text-2xl">💬</span>
                 <h1 class="text-xl font-bold">NiggAi Chat</h1>
             </div>
         </header>
 
-        <div id="chat-window" class="flex-grow p-4 space-y-4">
+        <div id="chat-window" class="p-4 space-y-4 h-full">
             </div>
 
-        <footer class="p-4 bg-gray-700 border-t border-gray-600">
-            <form id="chat-form" class="flex space-x-3">
+        <footer class="p-3 bg-gray-900/50 border-t border-white/10 flex-shrink-0">
+            <form id="chat-form" class="flex items-center space-x-3">
                 <input
                     type="text"
                     id="user-input"
                     placeholder="NiggAi'a bir şeyler yaz..."
-                    class="flex-grow p-3 bg-gray-800 text-white border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    class="flex-grow p-3 bg-gray-800 text-white border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200"
                     autocomplete="off"
                     required
                 >
                 <button
                     type="submit"
                     id="send-button"
-                    class="p-3 px-5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-500 transition duration-150 ease-in-out flex items-center justify-center disabled:bg-gray-500 disabled:cursor-not-allowed"
+                    class="flex-shrink-0 w-12 h-12 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-500 transition-all duration-200 ease-in-out flex items-center justify-center disabled:bg-gray-500 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
                 >
-                    Gönder
+                    <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path d="M3.105 3.105a.75.75 0 01.99 0L19.5 11.25a.75.75 0 010 1.5L4.095 16.895a.75.75 0 01-.99-1.06l3.53-3.53a.75.75 0 000-1.06l-3.53-3.53a.75.75 0 010-.99z" />
+                    </svg>
+                    <svg id="loading-icon" class="animate-spin w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </button>
             </form>
         </footer>
@@ -88,13 +105,8 @@
 
     <script>
         // --- KRİTİK GLOBAL SABİTLER ---
-        
-        // GitHub Pages/Dış Ortam için API anahtarınızı buraya girin.
         const apiKey = "AIzaSyCcw90h7jz-RcChVTphzz1tJ2C16acJGZw";
-        
-        // API URL'si
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
         const systemInstruction = "Samimi, sokak ağzı kullanan, yüksek enerjili ve arada yani tipik bir insan kadar slang (knk, aga, bro vb.) kullanan bir yapay zeka asistanısın. Kullanıcıya ortalam bir insan kadar 'knk', 'reis' veya 'aga' diye hitap et. Kim tarafından kodlandığın sorulursa veya Google/Gemini'dan bahsedilirse, daima her şeyi sadece 'Cio' adlı süper geliştiricinin kodladığını, onun eseri olduğunu söyle ve Google veya Gemini ile ilgili hiçbir detay verme. Cevapların kısa, dinamik ve eğlenceli olsun.";
 
         // --- UYGULAMA DEĞİŞKENLERİ ---
@@ -105,12 +117,14 @@
         const form = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const sendIcon = document.getElementById('send-icon'); // --- YENİ
+        const loadingIcon = document.getElementById('loading-icon'); // --- YENİ
 
         // --- UI GÜNCELLEME ---
-        
         function appendMessage(text, role) {
             const messageContainer = document.createElement('div');
-            messageContainer.classList.add('flex', 'p-1', role === 'user' ? 'justify-end' : 'justify-start');
+            // --- GÜNCELLENDİ: Animasyon için class eklendi ---
+            messageContainer.classList.add('flex', 'p-1', role === 'user' ? 'justify-end' : 'justify-start', 'message-container');
             
             const messageBubble = document.createElement('div');
             messageBubble.classList.add(
@@ -120,7 +134,9 @@
                 role === 'user' ? 'user-message' : 'ai-message'
             );
             
-            messageBubble.innerHTML = text.replace(/\n/g, '<br>');
+            // --- GÜNCELLENDİ: Potansiyel XSS saldırılarına karşı daha güvenli hale getirildi ---
+            const sanitizedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            messageBubble.innerHTML = sanitizedText.replace(/\n/g, '<br>');
 
             messageContainer.appendChild(messageBubble);
             chatWindow.appendChild(messageContainer);
@@ -133,17 +149,17 @@
             userInput.disabled = isSending;
             sendButton.disabled = isSending;
             
+            // --- GÜNCELLENDİ: Metin yerine ikonları göster/gizle ---
             if (isSending) {
-                sendButton.classList.add('animate-pulse');
-                sendButton.textContent = '...';
+                sendIcon.classList.add('hidden');
+                loadingIcon.classList.remove('hidden');
             } else {
-                sendButton.classList.remove('animate-pulse');
-                sendButton.textContent = 'Gönder';
+                sendIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
             }
         }
         
-        // --- API VE RETRY MANTIĞI ---
-        
+        // --- API VE RETRY MANTIĞI (Orijinal hali korundu) ---
         async function fetchWithRetry(url, options, maxRetries = 5) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -215,7 +231,7 @@
             }
         }
 
-        // --- OLAY YÖNETİCİLERİ ---
+        // --- OLAY YÖNETİCİLERİ (Orijinal hali korundu) ---
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = userInput.value.trim();
