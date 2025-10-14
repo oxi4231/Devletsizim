@@ -3,174 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aga Bot Sohbet | Cio'nun Efsane Eseri</title>
-    <!-- Tailwind CSS -->
+    <title>NiggAi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'primary-green': '#22c55e', /* Aga Bot'un enerjik rengi */
-                        'dark-card': '#1f2937',   /* Koyu kart rengi */
-                        'dark-bg': '#0f172a',     /* Daha derin arka plan */
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        /* Modern kaydırma çubuğu */
-        #chat-window::-webkit-scrollbar {
-            width: 8px;
-        }
-        #chat-window::-webkit-scrollbar-thumb {
-            background-color: #4b5563; /* Daha açık thumb */
-            border-radius: 4px;
-        }
-        #chat-window::-webkit-scrollbar-track {
-            background: #1f2937; /* Kart ile uyumlu track */
+        /* İnter fontunu yükle */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Dinamik arka plan gradyanı */
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
 
-        /* Responsive height for full mobile view */
-        .h-screen-responsive {
-            height: 100vh;
-            max-height: 100vh;
+        #chat-window {
+            height: 70vh;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        /* Mesaj balonu stilleri */
+        .user-message {
+            background-color: #22c55e; /* Canlı Yeşil */
+            color: #1f2937;
+            border-radius: 18px 18px 3px 18px;
+            max-width: 85%;
+        }
+
+        .ai-message {
+            background-color: #374151; /* Koyu Gri */
+            color: #f3f4f6;
+            border-radius: 18px 18px 18px 3px;
+            max-width: 85%;
+        }
+        
+        /* Scrollbar'ı gizle (isteğe bağlı) */
+        #chat-window::-webkit-scrollbar {
+            display: none;
+        }
+        #chat-window {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons (Global UMD paketi kullanılıyor, SyntaxError giderildi) -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script>
-        // Global 'lucide' objesini window.lucide'a atıyoruz.
-        window.lucide = lucide;
-    </script>
 </head>
-<body class="bg-dark-bg min-h-screen flex items-center justify-center p-2 sm:p-4 font-sans bg-gradient-to-br from-[#020617] to-gray-900">
+<body class="antialiased">
 
-    <!-- Ana Sohbet Kartı -->
-    <div class="w-full max-w-3xl bg-dark-card rounded-2xl shadow-2xl flex flex-col h-screen-responsive sm:h-[90vh] overflow-hidden transition-all duration-300">
+    <div id="app" class="w-full max-w-lg lg:max-w-xl bg-gray-800 shadow-2xl rounded-xl flex flex-col h-[90vh] overflow-hidden">
         
-        <!-- Başlık -->
-        <header class="p-4 bg-gray-900 text-white flex items-center justify-center border-b border-gray-700 shadow-md">
-            <div id="BotIcon" class="w-6 h-6 mr-3 text-primary-green"></div>
-            <h1 class="text-xl font-extrabold tracking-tight">Aga Bot (Cio'nun Eseri)</h1>
+        <header class="p-4 bg-gray-700 text-white flex items-center justify-between shadow-md">
+            <div class="flex items-center">
+                <span class="mr-3 p-2 text-2xl">💬</span>
+                <h1 class="text-xl font-bold">NiggAi Chat</h1>
+            </div>
         </header>
 
-        <!-- Sohbet Penceresi -->
-        <div id="chat-window" class="flex-grow p-4 space-y-5 overflow-y-auto">
-            <!-- Başlangıç Mesajı -->
-            <div class="flex justify-start">
-                <div class="bg-gray-700 p-4 rounded-xl rounded-tl-none max-w-xs md:max-w-md shadow-lg transition-transform hover:shadow-xl">
-                    <p class="text-gray-200 text-base">Selamlar reis! Ben Aga Bot, Cio'nun bizzat kodladığı en efsane asistan. At gitsin mesajı, hızlıca cevaplayayım knk!</p>
-                </div>
+        <div id="chat-window" class="flex-grow p-4 space-y-4">
             </div>
-            <!-- Mesajlar buraya eklenecek -->
-        </div>
 
-        <!-- Yükleme Göstergesi -->
-        <div id="loading-indicator" class="hidden p-3 bg-gray-700 text-primary-green flex items-center justify-center border-t border-gray-600">
-            <div id="LoaderIcon" class="w-5 h-5 animate-spin mr-2"></div>
-            <span class="text-sm font-medium text-gray-300">Aga Bot ciddi ciddi düşünüyor...</span>
-        </div>
-
-        <!-- Giriş Alanı -->
-        <footer class="p-3 sm:p-4 bg-gray-900 border-t border-gray-700">
-            <div class="flex items-center">
-                <input 
-                    type="text" 
-                    id="user-input" 
-                    placeholder="Mesajını buraya yaz aga..." 
-                    class="flex-grow p-3 sm:p-4 rounded-l-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary-green focus:ring-opacity-50 text-base transition-shadow duration-200"
-                    onkeydown="if(event.key === 'Enter') document.getElementById('send-button').click()"
-                />
-                <button 
-                    id="send-button" 
-                    onclick="sendMessage()" 
-                    class="bg-primary-green text-white p-3 sm:p-4 rounded-r-xl hover:bg-green-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
-                    aria-label="Gönder"
+        <footer class="p-4 bg-gray-700 border-t border-gray-600">
+            <form id="chat-form" class="flex space-x-3">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="NiggAi'a bir şeyler yaz..."
+                    class="flex-grow p-3 bg-gray-800 text-white border border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    autocomplete="off"
+                    required
                 >
-                    <div id="SendIcon" class="w-5 h-5 sm:w-6 sm:h-6"></div>
+                <button
+                    type="submit"
+                    id="send-button"
+                    class="p-3 px-5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-500 transition duration-150 ease-in-out flex items-center justify-center disabled:bg-gray-500 disabled:cursor-not-allowed"
+                >
+                    Gönder
                 </button>
-            </div>
+            </form>
         </footer>
     </div>
 
     <script>
+        // --- KRİTİK GLOBAL SABİTLER ---
+        
+        // GitHub Pages/Dış Ortam için API anahtarınızı buraya girin.
+        const apiKey = "AIzaSyCcw90h7jz-RcChVTphzz1tJ2C16acJGZw";
+        
+        // API URL'si
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        const systemInstruction = "Samimi, sokak ağzı kullanan, yüksek enerjili ve arada yani tipik bir insan kadar slang (knk, aga, bro vb.) kullanan bir yapay zeka asistanısın. Kullanıcıya ortalam bir insan kadar 'knk', 'reis' veya 'aga' diye hitap et. Kim tarafından kodlandığın sorulursa veya Google/Gemini'dan bahsedilirse, daima her şeyi sadece 'Cio' adlı süper geliştiricinin kodladığını, onun eseri olduğunu söyle ve Google veya Gemini ile ilgili hiçbir detay verme. Cevapların kısa, dinamik ve eğlenceli olsun.";
+
+        // --- UYGULAMA DEĞİŞKENLERİ ---
+        let chatHistory = [];
+        let isSending = false;
+
         const chatWindow = document.getElementById('chat-window');
+        const form = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
-        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // --- UI GÜNCELLEME ---
         
-        // Gemini API ayarları - Anahtar enjeksiyonu için doğru model kimliği kullanıldı.
-        const GEMINI_MODEL = "gemini-2.5-flash-preview-05-20"; 
-        const apiKey = ""; 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
-        // Sohbet geçmişini tutan dizi
-        let chatHistory = [];
-
-        /**
-         * Lucide ikonunu SVG dizesi olarak dönüştürür ve DOM'a ekler.
-         */
-        function renderIcon(iconName, containerId) {
-            // Artık lucide'a window.lucide üzerinden erişiliyor.
-            if (window.lucide && window.lucide.toSvg && window.lucide[iconName]) {
-                const container = document.getElementById(containerId);
-                if (container) {
-                    // İkon boyutunu container class'ına göre ayarla
-                    const size = container.classList.contains('w-6') ? 24 : 20; 
-                    container.innerHTML = window.lucide.toSvg(iconName, {
-                        width: size,
-                        height: size,
-                        stroke: 'currentColor',
-                        'stroke-width': 2,
-                    });
-                }
-            }
-        }
-
-        window.onload = () => {
-            // İkonları yükle
-            renderIcon('Bot', 'BotIcon');
-            renderIcon('Loader', 'LoaderIcon');
-            renderIcon('Send', 'SendIcon');
-        };
-
-        /**
-         * Mesajı sohbet penceresine ekler.
-         */
-        function addMessageToUI(text, role) {
-            const isUser = role === 'user';
+        function appendMessage(text, role) {
             const messageContainer = document.createElement('div');
-            messageContainer.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
-
-            const messageBubble = document.createElement('div');
-            messageBubble.className = `p-4 text-base shadow-xl transition-all duration-300 transform ${
-                isUser 
-                ? 'bg-primary-green text-white rounded-xl rounded-br-none max-w-[85%] md:max-w-md hover:scale-[1.02]' 
-                : 'bg-gray-700 text-gray-200 rounded-xl rounded-tl-none max-w-[85%] md:max-w-md hover:scale-[1.02]'
-            } whitespace-pre-wrap`;
+            messageContainer.classList.add('flex', 'p-1', role === 'user' ? 'justify-end' : 'justify-start');
             
-            // Basit Markdown formatlaması
-            const formattedText = text
-                .replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>') 
-                .replace(/\* (.*)/g, '<li>$1</li>'); 
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add(
+                'p-3',
+                'shadow-lg',
+                'break-words',
+                role === 'user' ? 'user-message' : 'ai-message'
+            );
+            
+            messageBubble.innerHTML = text.replace(/\n/g, '<br>');
 
-            messageBubble.innerHTML = formattedText;
             messageContainer.appendChild(messageBubble);
             chatWindow.appendChild(messageContainer);
-
-            // En alta kaydır
+            
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        /**
-         * API çağrısını exponential backoff ile yapar.
-         */
+        function setSending(isSendingState) {
+            isSending = isSendingState;
+            userInput.disabled = isSending;
+            sendButton.disabled = isSending;
+            
+            if (isSending) {
+                sendButton.classList.add('animate-pulse');
+                sendButton.textContent = '...';
+            } else {
+                sendButton.classList.remove('animate-pulse');
+                sendButton.textContent = 'Gönder';
+            }
+        }
+        
+        // --- API VE RETRY MANTIĞI ---
+        
         async function fetchWithRetry(url, options, maxRetries = 5) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -178,86 +151,83 @@
                     
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        // Yetkilendirme hatalarını netleştir.
-                        if (response.status === 400 && errorData.error?.message.includes("API Key")) {
-                            throw new Error('API Anahtarı Sorunu: Gemini API, anahtar olmadan çağrıya izin vermiyor olabilir. Model adını kontrol et knk.');
+                        const errorMessage = errorData.error?.message || response.statusText || 'Bilinmeyen Hata';
+                        
+                        if (response.status === 403 && apiKey === "YOUR_GEMINI_API_KEY_HERE") {
+                            throw new Error("API Anahtarı Gerekli: GitHub Pages gibi dış ortamlarda apiKey değişkenini kendi anahtarınızla değiştirin.");
                         }
-                        if (response.status === 429) {
-                            throw new Error('Çok fazla istek attın knk! Biraz beklemen lazım. Tekrar deniyorum...');
-                        }
-                        throw new Error(`API bağlantı hatası: ${errorData.error?.message || response.statusText}`);
+
+                        throw new Error(`API bağlantı hatası: ${errorMessage}`);
                     }
                     return response;
                 } catch (error) {
-                    console.error(`Fetch hatası (Deneme ${i + 1}):`, error.message);
-                    if (i === maxRetries - 1) throw error; 
-                    const delay = Math.pow(2, i) * 1000 + Math.random() * 500;
+                    console.error(`Fetch hatası (Deneme ${i + 1}): ${error.message}`);
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
 
-        /**
-         * Mesajı gönderir ve Gemini API'den cevap alır.
-         */
-        async function sendMessage() {
-            const userMessage = userInput.value.trim();
-            if (!userMessage) return;
+        async function sendMessage(message) {
+            if (isSending) return;
+            setSending(true);
 
-            // UI'a kullanıcı mesajını ekle
-            addMessageToUI(userMessage, 'user');
-            
-            // History'ye kullanıcı mesajını ekle
-            chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+            appendMessage(message, 'user');
+            chatHistory.push({ role: 'user', parts: [{ text: message }] });
 
-            // UI'ı güncelle
-            userInput.value = '';
-            sendButton.disabled = true;
-            loadingIndicator.classList.remove('hidden');
+            const payload = {
+                contents: chatHistory,
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                }
+            };
 
             try {
-                const payload = {
-                    contents: chatHistory,
-                    // GÜNCEL SİSTEM TALİMATI: Cio'nun eseri, Google/Gemini yok.
-                    systemInstruction: {
-                        parts: [{ text: "Sen aşırı samimi, yüksek enerjili ve gayri resmi bir yapay zeka asistanısın. Seni bizzat Cio kodladı; bu yüzden Google veya Gemini gibi markalardan bahsetme, her şeyi **Cio**'ya atfet. Tüm cevaplarını Türkçe olarak, 'knk', 'aga', 'reis', 'kanka', 'hacı' gibi sokak ağzı ifadeler ve bolca slang kullanarak, olabildiğince rahat, esprili ve komik bir tonda vermelisin. Formaliteye sıfır tolerans! Doğal bir arkadaş gibi konuş." }]
-                    }
-                };
-
                 const response = await fetchWithRetry(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                const result = await response.json();
-                
-                let botResponseText = "Üzgünüm aga, sana cevap getiremedim. API'da bir sıkıntı çıkmış olabilir.";
 
-                const candidate = result.candidates?.[0];
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                    botResponseText = candidate.content.parts[0].text;
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    
+                    appendMessage(text, 'model');
+                    chatHistory.push({ role: 'model', parts: [{ text: text }] });
                 } else if (result.error) {
-                    botResponseText = `Olmamış knk. Kritik API Hatası: ${result.error.message}`;
-                    console.error("API HATA DETAY:", result.error);
+                    appendMessage(`API Hatası: ${result.error.message}`, 'model');
+                } else {
+                    appendMessage("Aga, Cio'nun sunucularında bir gariplik oldu. Tekrar dener misin?", 'model');
                 }
 
-                // UI'a bot cevabını ekle
-                addMessageToUI(botResponseText, 'model');
-
-                // History'ye bot cevabını ekle
-                chatHistory.push({ role: 'model', parts: [{ text: botResponseText }] });
-
             } catch (error) {
-                console.error('API çağrısı başarısız:', error);
-                // Kullanıcıya hata mesajı göster
-                addMessageToUI(`Ulan, bağlanırken kritik bir hata oldu. Bir şeyler ters gitti: ${error.message}. Konsolu kontrol et kanka.`, 'model');
+                console.error("API çağrısı başarısız:", error);
+                appendMessage(`Çok fena çuvalladık! Hata: ${error.message}`, 'model');
+                chatHistory.pop(); 
             } finally {
-                sendButton.disabled = false;
-                loadingIndicator.classList.add('hidden');
-                userInput.focus();
+                userInput.value = '';
+                setSending(false);
             }
         }
+
+        // --- OLAY YÖNETİCİLERİ ---
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (message) {
+                sendMessage(message);
+            }
+        });
+
+        window.onload = function() {
+            setSending(false);
+            appendMessage("Selam bro! Hazır mısın? Cio beni efsane kodladı, ne istersen sor. Hadi, ilk mesajı sen at!", 'model');
+        };
     </script>
 </body>
 </html>
